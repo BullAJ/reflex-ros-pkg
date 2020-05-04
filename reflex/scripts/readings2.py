@@ -9,7 +9,7 @@ from std_srvs.srv import Empty, Trigger, TriggerResponse
 from std_msgs.msg import Bool
 from bwhpf_ex import butter_bandpass_filter
 
-_HAND_VERSION = ""
+_HAND_VERSION = ""  # Empty string denotes first hand version
 from reflex_msgs2.msg import PoseCommand, VelocityCommand, ForceCommand, Hand, Finger
 _NUM_SENSORS = 14  # per finger
 _USE_ACCEL = True
@@ -22,10 +22,10 @@ _FILTERING = True
 _DIFF = 0
 _NUM_SAMPLES = 100  # The reflex hand_state topic gives us 20hz - i.e. 50 gives 2.5 seconds of history)
 _HIGHCUT = 5.0  # Hz
-_LOWCUT = 5.0  # Hz, best found 5.0
+_LOWCUT = 5.0  # Hz, tested 1, 5, 10. (When last in lab value was 5.0)
 _HIGHCHEBY = 5.0  # Hz
 _LOWCHEBY = 1.0  # Hz
-_ACC_HIGHCUT = 15.0  # Hz, best found 15.0
+_ACC_HIGHCUT = 15.0  # Hz, tested 5, 10, 15 (When last in lab value was 15.0)
 _RIPPLE  = 20  # Maximum allowable ripple for chebyshev filter
 
 _LOOP_HZ = 20
@@ -163,7 +163,7 @@ class HandReader:
         # UNLOCK
         # self.forces_lock.release()
 
-        next_reading = self.digit_forces[:_NUM_SAMPLES + _DIFF]
+        next_reading = self.digit_forces[-(_NUM_SAMPLES + _DIFF):]
         if _DIFF:
             next_reading = np.diff(next_reading, axis=0)
         if _FILTERING:
@@ -205,7 +205,7 @@ class HandReader:
                 self.hifilt_acc = next_reading
 
     def collect_exp(self):
-        rospy.Timer(rospy.Duration(1.0/_LOOP_HZ), self.collect_exp_step)
+        self.t = rospy.Timer(rospy.Duration(1.0/_LOOP_HZ), self.collect_exp_step)
 
     def dump_structures_to_file(self):
         if _USE_ACCEL:
@@ -443,6 +443,10 @@ class HandReader:
         f3_stopped = self.hand_state.motor[2].velocity < stop_threshold
         return f1_stopped and f2_stopped and f3_stopped
 
+    def stop_exp(self):
+        self.stop()
+        self.dump_structures_to_file()
+
     def stop(self):
         self.running = False
         self.t.shutdown()
@@ -451,7 +455,6 @@ class HandReader:
 if __name__ == "__main__":
     # rospy.wait_for_message("/reflex_takktile/hand_state_throttle", Hand)
     reader = HandReader()
-    # rospy.on_shutdown(reader.dump_structures_to_file)
+    rospy.on_shutdown(reader.stop_exp)
     reader.collect_exp()
     rospy.spin()
-    reader.dump_structures_to_file()
