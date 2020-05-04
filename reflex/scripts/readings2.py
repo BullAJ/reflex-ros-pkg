@@ -9,7 +9,7 @@ from std_srvs.srv import Empty, Trigger, TriggerResponse
 from std_msgs.msg import Bool
 from bwhpf_ex import butter_bandpass_filter
 
-_HAND_VERSION = ""  # Empty string denotes first hand version
+_HAND_VERSION = "2"  # Empty string denotes first hand version, '2' the second
 from reflex_msgs2.msg import PoseCommand, VelocityCommand, ForceCommand, Hand, Finger
 _NUM_SENSORS = 14  # per finger
 _USE_ACCEL = True
@@ -25,7 +25,7 @@ _HIGHCUT = 5.0  # Hz
 _LOWCUT = 5.0  # Hz, tested 1, 5, 10. (When last in lab value was 5.0)
 _HIGHCHEBY = 5.0  # Hz
 _LOWCHEBY = 1.0  # Hz
-_ACC_HIGHCUT = 15.0  # Hz, tested 5, 10, 15 (When last in lab value was 15.0)
+_ACC_HIGHCUT = 5.0  # Hz, tested 5, 10, 15 (When last in lab value was 15.0)
 _RIPPLE  = 20  # Maximum allowable ripple for chebyshev filter
 
 _LOOP_HZ = 20
@@ -195,7 +195,7 @@ class HandReader:
             # UNLOCK ACC
             # self.acc_lock.release()
 
-            next_reading = self.acc[:_NUM_SAMPLES]
+            next_reading = self.acc[-_NUM_SAMPLES:]
             if _FILTERING:
                 if self.hifilt_acc is None:
                     self.hifilt_acc = scipy.signal.lfilter(self.acc_b, self.acc_a, next_reading, axis=0)[-1]
@@ -226,7 +226,7 @@ class HandReader:
         # UNLOCK
         self.forces_lock.release()
 
-        next_reading = self.digit_forces[:_NUM_SAMPLES + _DIFF]
+        next_reading = self.digit_forces[-(_NUM_SAMPLES + _DIFF):]
         if _DIFF:
             next_reading = np.diff(next_reading, axis=0)
         if _FILTERING:
@@ -248,7 +248,7 @@ class HandReader:
         # UNLOCK ACC
         self.acc_lock.release()
 
-        next_reading = self.acc[:_NUM_SAMPLES]
+        next_reading = self.acc[-_NUM_SAMPLES:]
         if _FILTERING:
             self.hifilt_acc = scipy.signal.lfilter(self.acc_b, self.acc_a, next_reading, axis=0)
         else:
