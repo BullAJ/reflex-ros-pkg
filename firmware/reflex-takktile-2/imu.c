@@ -531,7 +531,8 @@ void imu_poll_nonblocking_tick(const uint8_t imuNumber)
       // Switch case to select register address to read data from
       switch(imu_poll_type[imuNumber]){
         case IMU_DATA:
-          registerAddress = BNO055_QUATERNION_DATA_W_LSB_ADDR;
+          // registerAddress = BNO055_QUATERNION_DATA_W_LSB_ADDR;
+          registerAddress = BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR;
           break;
         case IMU_CAL_STATUS:
           registerAddress = BNO055_CALIB_STAT_ADDR;
