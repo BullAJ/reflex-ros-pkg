@@ -40,7 +40,7 @@ _VTHRESH = 0.001 * 10  # m/s
 
 # Constants made for LL4MA
 _TSETTLE = 0.1  # Changed from Romano
-_F2D = 0.0036  # The gain on the control signal, 0.002 is too low for firm objects
+_KF = 0.0036  # The gain on the control signal, 0.002 is too low for firm objects
 _FERR = 0.04  #* _F_GAINS  # The minimum amount we adjust any given finger in control, ends up being useless with window
 _LOWINDOW = -5  # The lower bound on deltas we allow for forces read from the fingers vs desires
 _HIWINDOW = 40  # The upper bound ''
@@ -114,7 +114,7 @@ class ReflexController:
         # 'E' in Romano
         # Control law
         # Hack: Increase desired F for finger 3, and/or give it more error
-        delta = _F2D * (F_des - F_observed)
+        delta = _KF * (F_des - F_observed)
         return np.where(abs(delta) < _FERR, 0, delta)  # 0 the delta if it's within tolerance
 
     def control1(self, F_observed, F_des=None):
@@ -145,14 +145,14 @@ class ReflexController:
         for i in range(3):
             '''
             if delta[i] < _LOWINDOW:
-                self.pose[i] = current_pose[i] - _F2D * (delta[i] - _LOWINDOW)
+                self.pose[i] = current_pose[i] - _KF * (delta[i] - _LOWINDOW)
                 self.finger_adjustment_states[i] = 1  # Tightening or loosening the joint
             elif delta[i] > _HIWINDOW:
-                self.pose[i] = current_pose[i] - _F2D * (delta[i] - _HIWINDOW)
+                self.pose[i] = current_pose[i] - _KF * (delta[i] - _HIWINDOW)
                 self.finger_adjustment_states[i] = 1
             '''
             if delta[i] < _LOWINDOW or delta[i] > _HIWINDOW:
-                self.pose[i] = current_pose[i] - _F2D * delta[i]
+                self.pose[i] = current_pose[i] - _KF * delta[i]
                 self.finger_adjustment_states[i] = 1
             elif self.finger_adjustment_states[i] != 0:  # We changed state to a stable condition - force reading is within window and we were previously adjusting
                 self.pose[i] = current_pose[i]
