@@ -25,7 +25,7 @@ _HIGHCUT = 5.0  # Hz
 _LOWCUT = 5.0  # Hz, tested 1, 5, 10. (When last in lab value was 5.0)
 _HIGHCHEBY = 5.0  # Hz
 _LOWCHEBY = 1.0  # Hz
-_ACC_HIGHCUT = 5.0  # Hz, tested 5, 10, 15 (When last in lab value was 15.0)
+_ACC_HIGHCUT = 15.0  # Hz, tested 5, 10, 15 (When last in lab value was 15.0)
 _RIPPLE  = 20  # Maximum allowable ripple for chebyshev filter
 
 _LOOP_HZ = 20

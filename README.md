@@ -1,6 +1,14 @@
 reflex-ros-pkg
 ======
 
+Changes for Tactile Controller
+------
+Added scripts reflex_controller.py and readings2.py that function for the Tactile Controller for my thesis as part of the University of Utah.
+Changed imu.c to allow transmission of linear acceleration data. All that was required was a register start address change (see datasheet for IMU).
+
+Original Documentation
+======
+
 Electronics, Firmware, and Software for the Reflex Hand controller. The software is organized into the following ROS packages
 
 1. reflex -- Contains the command and control code for the hands (Reflex SF and Reflex Takktile)
